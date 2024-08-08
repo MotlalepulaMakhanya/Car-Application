@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Car CRUD API Application</title>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+  <h1>Car Application</h1>
+  <div x-data="carManagement">
+    <button @click="fetchCars">Get Cars</button>
+
+    <template x-if="cars.length > 0">
+      <div>
+        <h3>List of Cars</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Color</th>
+              <th>Make</th>
+              <th>Models</th>
+              <th>Reg Numbers</th>
+              <th>Edits</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="car in cars" :key="car.reg_number">
+              <tr>
+                <td x-text="car.color"></td>
+                <td x-text="car.make"></td>
+                <td x-text="car.model"></td>
+                <td x-text="car.reg_number"></td>
+                <td>
+                  <button @click="editCar(car)">Change</button>
+                  <button @click="deleteCar(car.reg_number)">Delete</button>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+        <h3>Most Popular Car Make:</h3>
+        <div><button @click="fetchMostPopularMake">Most Popular Make</button>
+          <div x-text="mostPopularMake"></div>
+        </div>
+
+      </div>
+    </template>
+
+    <h3>Add a New Car</h3>
+    <form @submit.prevent="addCar">
+      <input type="text" x-model="newCar.color" placeholder="Color">
+      <input type="text" x-model="newCar.make" placeholder="Make">
+      <input type="text" x-model="newCar.model" placeholder="Model">
+      <input type="text" x-model="newCar.reg_number" placeholder="Reg Number">
+      <button type="submit">Add Car</button>
+    </form>
+
+    <template x-if="selectedCar">
+      <div>
+        <h3>Update Car</h3>
+        <form @submit.prevent="updateCar">
+          <input type="text" x-model="selectedCar.color" placeholder="Color">
+          <input type="text" x-model="selectedCar.make" placeholder="Make">
+          <input type="text" x-model="selectedCar.model" placeholder="Model">
+          <input type="text" x-model="selectedCar.reg_number" placeholder="Reg Number" enabled>
+          <button type="submit">Update Car</button>
+        </form>
+      </div>
+    </template>
+  </div>
+
+  <script>
+    function carManagement() {
+      return {
+        cars: [],
+        mostPopularMake: '',
+        newCar: {
+          color: '',
+          make: '',
+          model: '',
+          reg_number: ''
+        },
+        selectedCar: null,
+        fetchCars() {
+          axios.get('http://localhost:3000/cars')
+            .then(response => {
+              this.cars = response.data;
+            });
+        },
+        fetchMostPopularMake() {
+          axios.get('http://localhost:3000/mostPopularCar')
+            .then(response => {
+              this.mostPopularMake = response.data.mostPopularMake;
+            });
+        },
+        addCar() {
+          axios.post('http://localhost:3000/cars', this.newCar)
+            .then(response => {
+              this.cars.push(response.data);
+              this.newCar = {
+                color: '',
+                make: '',
+                model: '',
+                reg_number: ''
+              };
+            });
+        },
+        deleteCar(regNumber) {
+          axios.delete(`http://localhost:3000/cars/${regNumber}`)
+            .then(() => {
+              this.cars = this.cars.filter(car => car.reg_number !== regNumber);
+            });
+        },
+        editCar(car) {
+          this.selectedCar = { ...car };
+        },
+        updateCar() {
+          axios.put(`http://localhost:3000/cars/${this.selectedCar.reg_number}`, this.selectedCar)
+            .then(() => {
+              this.cars = this.cars.map(car => car.reg_number === this.selectedCar.reg_number ? this.selectedCar : car);
+              this.selectedCar = null;
+            });
+        }
+      };
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      background-image: url(widgets.webp);
+      background-repeat: no-repeat;
+      background-size: cover;
+      margin: 1em;
+      padding: 1em;
+    }
+
+    h3 {
+      text-align: center;
+      margin: 1em;
+      padding: 1em;
+      background-color: #ddd;
+    }
+
+    button {
+      background-color: blueviolet;
+      text-decoration-color: white;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: orangered;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      background-image: url(./premium_photo-1661963287664-ea60b0039118.avif);
+      background-size: cover;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid purple;
+    }
+
+    th {
+      background-color: orangered;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 1em;
+      padding: 1em;
+      background-image: url(./photo-1487947366323-374a622aeccf.avif);
+      background-size: cover;
+    }
+
+    input[type="number"] {
+      width: 50%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .car-list,
+    .form-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .most-popular {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    @media (max-width: 768px) {
+
+      .form-container,
+      .car-list {
+        width: 100%;
+      }
+    }
+  </style>
+</body>
+
+</html>

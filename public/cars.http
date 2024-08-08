@@ -1,0 +1,30 @@
+GET http://localhost:3000/cars
+Accept: application/json
+
+### Create a new car
+POST http://localhost:3000/cars
+Content-Type: application/json
+
+{
+  "color": "Red",
+  "make": "Toyota",
+  "model": "Camry",
+  "reg_number": "ABC1235"
+}
+
+### Update a car
+PUT http://localhost:3000/cars/ABC1235
+Content-Type: application/json
+
+{
+  "color": "Blue",
+  "make": "Toyota",
+  "model": "Camry",
+  "reg_number": "ABC123"
+}
+
+### Delete a car
+DELETE http://localhost:3000/cars/ABC123
+
+### Get Most Popular Car Make
+GET http://localhost:3000/cars/mostPopularMake
